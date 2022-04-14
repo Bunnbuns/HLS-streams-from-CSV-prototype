@@ -3,6 +3,7 @@ const fileUpload = require("express-fileupload")
 const path = require("path")
 const fs = require('fs')
 const {parse} = require('csv-parse')
+const Transform = require("stream").Transform
 
 const port = 3000
 
@@ -12,9 +13,7 @@ app.use(
   fileUpload()
 )
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"))
-})
+app.use(express.static('public'))
 
 app.post("/upload", (req, res) => {
   if (!req.files) {
@@ -23,13 +22,28 @@ app.post("/upload", (req, res) => {
 
   const file = req.files.csvFile
   console.log(`Got file: ${file.name}`)
-  //console.log(file)
-  processCSV(file)
+  processCSV(file, req, res)
 })
 
-const processCSV = (csvFile) => {
+const processCSV = (csvFile, req, res) => {
   parse(csvFile.data, { columns: true }, function (err, data) {
     console.log(data)
+    // const videoJson = JSON.parse(data)
+    // var viewHTML = path.join(__dirname, "view.html")
+    // res.sendFile(viewHTML).replace(/${TITLE}/gi, 'test')
+    //res.send(data[0].video_url)
+    const videoData = data[0]
+    const replacementTransform = new Transform()
+    replacementTransform._transform = function(data, encoding, done) {
+        const str = data.toString().replace(/{VIDEO_URL}/gi, videoData.video_url).replace(/{TITLE}/gi, videoData.name)
+        this.push(str)
+        done()
+    }
+    let stream = fs.createReadStream('./view.html')
+    stream.pipe(replacementTransform)
+    .on('end', () => {
+        res.write('\n<!-- End -->')
+    }).pipe(res)
   })
 }
 

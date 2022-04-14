@@ -1,3 +1,45 @@
 body {
-  font-family: Arial, sans-serif;
+	font-family: Arial, sans-serif;
+}
+
+.flex-center {
+	display: flex;
+	align-items: baseline;
+}
+
+.flex-grow {
+	display: flex;
+	flex-grow: 1;
+}
+
+.flex-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.video-item {
+	margin: 6px;
+	width: calc(30% - 6px);
+}
+
+.video-item .title {
+	display: inline-block;
+	margin: 0.5rem 0;
+	margin-bottom: 0.25rem;
+	font-size: 1.15rem;
+	font-weight: 600;
+	text-decoration: none;
+	color: inherit;
+}
+
+.video-item a.title:hover {
+  text-decoration: underline;
+}
+
+.video-item .date {
+  display: inline-block;
+	color: rgba(145, 145, 145, 1);
+  font-size: 90%;
 }

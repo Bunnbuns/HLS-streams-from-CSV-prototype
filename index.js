@@ -25,17 +25,34 @@ app.post("/upload", (req, res) => {
   processCSV(file, req, res)
 })
 
+const createVideosHTML = (videosData) => {
+  let html = '<div class="flex-container">'
+  for (const video of videosData) {
+    html += (`
+      	<span class="video-item">
+      		<video-js id="myPlayer" controls preload="auto" class="video-js" data-setup='{"fluid": true}'>
+      			<source src="${video.video_url}" type="application/x-mpegURL">
+      		</video-js>
+      		<div class="flex-center">
+      			<a href="${video.traceid_url}" target="_blank" class="title">${video.name}</a>
+      			<span class="flex-grow"></span>
+      			<span class="date">${video.creation_time}</span>
+      		</div>
+      	</span>
+    `)
+  }
+  html += '</div>'
+  return html
+}
+
 const processCSV = (csvFile, req, res) => {
   parse(csvFile.data, { columns: true }, function (err, data) {
     console.log(data)
-    // const videoJson = JSON.parse(data)
-    // var viewHTML = path.join(__dirname, "view.html")
-    // res.sendFile(viewHTML).replace(/${TITLE}/gi, 'test')
-    //res.send(data[0].video_url)
-    const videoData = data[0]
+    const videoData = data
+    const videosHTML = createVideosHTML(videoData)
     const replacementTransform = new Transform()
     replacementTransform._transform = function(data, encoding, done) {
-        const str = data.toString().replace(/{VIDEO_URL}/gi, videoData.video_url).replace(/{TITLE}/gi, videoData.name)
+        const str = data.toString().replace(/{videos}/gi, videosHTML)
         this.push(str)
         done()
     }
@@ -44,6 +61,9 @@ const processCSV = (csvFile, req, res) => {
     .on('end', () => {
         res.write('\n<!-- End -->')
     }).pipe(res)
+    if (err) {
+      conslole.log(err)
+    }
   })
 }
 

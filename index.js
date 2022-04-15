@@ -10,10 +10,9 @@ const port = 3000
 const app = express()
 
 app.use(
-  fileUpload()
+  fileUpload(),
+  express.static('public')
 )
-
-app.use(express.static('public'))
 
 app.post("/upload", (req, res) => {
   if (!req.files) {
